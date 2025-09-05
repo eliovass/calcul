@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora Galáctica</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* Centra la calculadora en la pantalla con un fondo galáctico */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #0d0d2b, #2a1a5e); /* Azul y morado espacial */
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    /* Contenedor de la calculadora */
+    .calculadora {
+      background: #0a0a1f; /* Negro profundo */
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 0 30px rgba(128, 0, 255, 0.5); /* Sombra morada brillante */
+      width: 360px;
+      border: 2px solid #8000ff; /* Borde morado neon */
+    }
+
+    /* Pantalla con efecto de escáner */
+    .pantalla {
+      width: 100%;
+      height: 70px;
+      background: #000000;
+      color: #ffffff; /* Texto blanco brillante */
+      font-size: 28px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: flex-end; /* Alinea a la derecha */
+      align-items: center;
+      padding: 0 10px;
+      box-shadow: inset 0 0 15px rgba(128, 0, 255, 0.4);
+      overflow-x: auto;
+      border: 2px solid transparent;
+      animation: scanner 2s infinite; /* Animación de borde */
+    }
+
+    /* Animación de borde estilo escáner */
+    @keyframes scanner {
+      0% { border-color: #8000ff; }
+      50% { border-color: #00ffcc; }
+      100% { border-color: #8000ff; }
+    }
+
+    /* Cuadrícula de botones */
+    .botones {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr); /* 5 columnas para más espacio */
+      gap: 10px;
+    }
+
+    /* Estilo general de los botones */
+    button {
+      padding: 15px;
+      font-size: 18px;
+      border: none;
+      border-radius: 10px;
+      background: #1a1a3d; /* Azul oscuro */
+      color: #e6faff; /* Texto claro */
+      cursor: pointer;
+      transition: transform 0.1s, background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Efecto al pasar el ratón y al hacer clic */
+    button:hover {
+      background: #2b2b66; /* Azul más claro */
+      box-shadow: 0 0 12px rgba(128, 0, 255, 0.7); /* Brillo morado */
+    }
+    button:active {
+      transform: scale(0.95); /* Efecto de presión */
+    }
+
+    /* Botones de operadores */
+    .operador {
+      background: #8000ff; /* Morado galáctico */
+      color: #ffffff;
+      font-weight: bold;
+    }
+    .operador:hover {
+      background: #6600cc; /* Morado más oscuro */
+    }
+
+    /* Botón de igual */
+    .igual {
+      background: #00ffcc; /* Cian brillante */
+      color: #000000;
+      font-weight: bold;
+    }
+    .igual:hover {
+      background: #00b3a6; /* Cian más oscuro */
+    }
+
+    /* Botón de limpiar */
+    .limpiar {
+      background: #ff0066; /* Rosa estelar */
+      color: #ffffff;
+      font-weight: bold;
+    }
+    .limpiar:hover {
+      background: #cc0052; /* Rosa más oscuro */
+    }
+  </style>
+</head>
+<body>
+  <div class="calculadora">
+    <div id="pantalla" class="pantalla"></div>
+    <div class="botones">
+      <button onclick="agregar('0')">0</button>
+      <button onclick="agregar('1')">1</button>
+      <button onclick="agregar('a')">A</button>
+      <button onclick="agregar('b')">B</button>
+      <button onclick="agregar('c')">C</button>
+      <button class="operador" onclick="agregar('+')">+</button>
+      <button class="operador" onclick="agregar('-')">−</button>
+      <button class="operador" onclick="agregar('*')">×</button>
+      <button class="limpiar" onclick="limpiar()">C</button>
+      <button class="igual" onclick="calcular()">=</button>
+    </div>
+  </div>
+
+  <script>
+    const pantalla = document.getElementById("pantalla");
+
+    function agregar(valor) {
+      pantalla.textContent += valor;
+    }
+
+    function limpiar() {
+      pantalla.textContent = "";
+    }
+
+    function calcular() {
+      let expresion = pantalla.textContent;
+      let match = expresion.match(/^([01abc])([+\-*])([01abc])$/);
+      if (!match) {
+        pantalla.textContent = "Error";
+        setTimeout(limpiar, 1000); // Limpia tras 1 segundo
+        return;
+      }
+
+      let [_, op1, operador, op2] = match;
+      let resultado = aplicarRegla(op1, operador, op2);
+      pantalla.textContent = resultado;
+    }
+
+    function aplicarRegla(x, operador, y) {
+      const reglas = {
+        "*": {
+          "1": { "a": "a", "b": "b", "1": "1", "0": "0", "c": "c" },
+          "a": { "a": "a", "b": "a", "1": "a", "0": "0", "c": "a" },
+          "b": { "a": "b", "b": "b", "1": "b", "0": "0", "c": "b" },
+          "c": { "a": "c", "b": "c", "1": "c", "0": "0", "c": "c" },
+          "0": { "a": "0", "b": "0", "1": "0", "0": "0", "c": "0" }
+        },
+        "+": {
+          "1": { "a": "1", "b": "1", "c": "1", "1": "1", "0": "1" },
+          "a": { "a": "a", "b": "a", "c": "a", "1": "1", "0": "a" },
+          "b": { "a": "b", "b": "b", "c": "b", "1": "1", "0": "b" },
+          "c": { "a": "c", "b": "c", "c": "c", "1": "1", "0": "c" },
+          "0": { "a": "a", "b": "b", "c": "c", "1": "1", "0": "0" }
+        },
+        "-": {
+          "1": { "a": "0", "b": "0", "c": "0", "1": "0", "0": "1" },
+          "a": { "a": "0", "b": "b", "c": "c", "1": "0", "0": "a" },
+          "b": { "a": "a", "b": "0", "c": "c", "1": "0", "0": "b" },
+          "c": { "a": "a", "b": "b", "c": "0", "1": "0", "0": "c" },
+          "0": { "a": "a", "b": "b", "c": "c", "1": "1", "0": "0" }
+        }
+      };
+
+      if (reglas[operador] && reglas[operador][x] && reglas[operador][x][y] !== undefined) {
+        return reglas[operador][x][y];
+      } else {
+        return "Indef";
+      }
+    }
+  </script>
+</body>
+</html>
